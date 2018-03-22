@@ -113,7 +113,11 @@ class Emitter implements EmitterInterface
             return CallbackListener::fromCallable($listener);
         }
 
-        throw new InvalidArgumentException('Listeners should be be ListenerInterface, Closure or callable. Received type: '.gettype($listener));
+        if (is_string($listener)) {
+            return $listener;
+        }
+
+        throw new InvalidArgumentException('Listeners should be be ListenerInterface, Closure or callable, Listener Class Name. Received type: '.gettype($listener));
     }
 
     /**
@@ -212,6 +216,19 @@ class Emitter implements EmitterInterface
         foreach ($listeners as $listener) {
             if ($event->isPropagationStopped()) {
                 break;
+            }
+
+            /**
+             * if $listener value is a string `CLASS NAME` then create the object first.
+             * We implement this to avoid creating object when registering the listener to event-provider,
+             * The object only create when the method `emit` called
+             */
+            if (is_string($listener)) {
+                if (!class_exists($listener)) {
+                    throw new InvalidArgumentException('Listener class does not found');
+                }
+
+                $listener = new $listener;
             }
 
             call_user_func_array([$listener, 'handle'], $arguments);

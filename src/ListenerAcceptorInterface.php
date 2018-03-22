@@ -35,7 +35,7 @@ interface ListenerAcceptorInterface
      * may use one of our predefined constants here if you want.
      *
      * @param string                     $event
-     * @param ListenerInterface|callable $listener
+     * @param ListenerInterface|callable|string $listener
      * @param int                        $priority
      *
      * @return $this
